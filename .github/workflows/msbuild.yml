@@ -1,19 +1,39 @@
-name: Build (Windows/MSBuild)
+# Updated workflow: detect installed Windows SDK and pass WindowsTargetPlatformVersion to msbuild
+name: MSBuild
 
 on:
   push:
+    branches: [ "master" ]
   pull_request:
+    branches: [ "master" ]
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: LuaDec.sln
+
+  # Configuration type to build.
+  BUILD_CONFIGURATION: Release
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      
-    - name: Build with MSBuild (retarget to installed Windows SDK)
+    - uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Find Windows SDK version and Build with MSBuild
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      shell: powershell
       run: |
         Write-Host "Mencari Windows 10 SDK yang terpasang..."
         $sdkDir = 'C:\Program Files (x86)\Windows Kits\10\Include'
@@ -27,4 +47,4 @@ jobs:
         }
 
         Write-Host "Menjalankan msbuild dengan WindowsTargetPlatformVersion=$version"
-        msbuild ./LuaDec.sln /m /p:Configuration=Release /p:Platform=x64 /p:WindowsTargetPlatformVersion=$version
+        msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 /p:WindowsTargetPlatformVersion=$version ${{env.SOLUTION_FILE_PATH}}
