@@ -14,7 +14,6 @@ jobs:
       
     - name: Build with MSBuild (retarget to installed Windows SDK)
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      shell: powershell
       run: |
         Write-Host "Mencari Windows 10 SDK yang terpasang..."
         $sdkDir = 'C:\Program Files (x86)\Windows Kits\10\Include'
