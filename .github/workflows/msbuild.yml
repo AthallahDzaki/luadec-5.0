@@ -11,11 +11,9 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-
-    - name: Restore NuGet packages
-      run: nuget restore LuaDec.sln
-
+      
     - name: Build with MSBuild (retarget to installed Windows SDK)
+      working-directory: ${{env.GITHUB_WORKSPACE}}
       shell: powershell
       run: |
         Write-Host "Mencari Windows 10 SDK yang terpasang..."
